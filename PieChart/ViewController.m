@@ -8,18 +8,25 @@
 
 #import "ViewController.h"
 
-
 @interface ViewController ()
 
 @end
 
 @implementation ViewController
 
+#pragma mark - DLPieChartDelegate methods
+
+-(void)pieChart:(DLPieChart *)pieChart didSelectSliceAtIndex:(NSUInteger)index {
+    int value = [[self.pieChart.DLDataArray objectAtIndex:index] integerValue];
+    
+    NSLog(@"Changed value >> %i",value);
+}
+
+#pragma mark - Lifecycle methods
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
-    
     
     NSMutableArray * arrayChart = [NSMutableArray new];
     NSMutableArray * arrayColors = [NSMutableArray new];
@@ -44,21 +51,6 @@
     self.pieChart.layer.borderWidth = 2;
     self.pieChart.layer.cornerRadius = 10;
     self.pieChart.delegate = self;
-    
-}
-
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
-- (void)pieChart:(DLPieChart *)pieChart didSelectSliceAtIndex:(NSUInteger)index {
-    int value = [[self.pieChart.DLDataArray objectAtIndex:index] integerValue];
-    
-    NSLog(@"Tocou valor %i", value);
-    
-    
 }
 
 @end

@@ -12,36 +12,41 @@
 #define OFFSET 20
 
 @interface SliceLayer : CAShapeLayer
+
 @property (nonatomic, assign) CGFloat   value;
 @property (nonatomic, assign) CGFloat   percentage;
 @property (nonatomic, assign) double    startAngle;
 @property (nonatomic, assign) double    endAngle;
 @property (nonatomic, assign) BOOL      isSelected;
 @property (nonatomic, strong) NSString  *text;
+
 - (void)createArcAnimationForKey:(NSString *)key fromValue:(NSNumber *)from toValue:(NSNumber *)to Delegate:(id)delegate;
+
 @end
 
 @implementation SliceLayer
-@synthesize text = _text;
-@synthesize value = _value;
-@synthesize percentage = _percentage;
-@synthesize startAngle = _startAngle;
-@synthesize endAngle = _endAngle;
-@synthesize isSelected = _isSelected;
+
+//@synthesize text = _text;
+//@synthesize value = _value;
+//@synthesize percentage = _percentage;
+//@synthesize startAngle = _startAngle;
+//@synthesize endAngle = _endAngle;
+//@synthesize isSelected = _isSelected;
 
 - (NSString*)description
 {
     return [NSString stringWithFormat:@"value:%f, percentage:%0.0f, start:%f, end:%f", _value, _percentage, _startAngle/M_PI*180, _endAngle/M_PI*180];
 }
+
 + (BOOL)needsDisplayForKey:(NSString *)key 
 {
     if ([key isEqualToString:@"startAngle"] || [key isEqualToString:@"endAngle"]) {
         return YES;
     }
-    else {
-        return [super needsDisplayForKey:key];
-    }
+    
+    return [super needsDisplayForKey:key];
 }
+
 - (id)initWithLayer:(id)layer
 {
     if (self = [super initWithLayer:layer])
@@ -53,6 +58,7 @@
     }
     return self;
 }
+
 - (void)createArcAnimationForKey:(NSString *)key fromValue:(NSNumber *)from toValue:(NSNumber *)to Delegate:(id)delegate
 {
     CABasicAnimation *arcAnimation = [CABasicAnimation animationWithKeyPath:key];
@@ -65,14 +71,17 @@
     [self addAnimation:arcAnimation forKey:key];
     [self setValue:to forKey:key];
 }
+
 @end
 
 @interface DLPieChart (Private) 
+
 - (void)updateTimerFired:(NSTimer *)timer;
 - (SliceLayer *)createSliceLayer;
 - (CGSize)sizeThatFitsString:(NSString *)string;
 - (void)updateLabelForLayer:(SliceLayer *)pieLayer value:(CGFloat)value;
 - (void)notifyDelegateOfSelectionChangeFrom:(NSUInteger)previousSelection to:(NSUInteger)newSelection;
+
 @end
 
 @implementation DLPieChart
@@ -88,21 +97,20 @@
 
 static NSUInteger kDefaultSliceZOrder = 100;
 
-@synthesize dataSource = _dataSource;
-@synthesize delegate = _delegate;
-@synthesize startPieAngle = _startPieAngle;
-@synthesize animationSpeed = _animationSpeed;
-@synthesize pieCenter = _pieCenter;
-@synthesize pieRadius = _pieRadius;
-@synthesize showLabel = _showLabel;
-@synthesize labelFont = _labelFont;
-@synthesize labelColor = _labelColor;
-@synthesize labelShadowColor = _labelShadowColor;
-@synthesize labelRadius = _labelRadius;
-@synthesize selectedSliceStroke = _selectedSliceStroke;
-@synthesize selectedSliceOffsetRadius = _selectedSliceOffsetRadius;
-@synthesize showPercentage = _showPercentage;
-
+//@synthesize dataSource = _dataSource;
+//@synthesize delegate = _delegate;
+//@synthesize startPieAngle = _startPieAngle;
+//@synthesize animationSpeed = _animationSpeed;
+//@synthesize pieCenter = _pieCenter;
+//@synthesize pieRadius = _pieRadius;
+//@synthesize showLabel = _showLabel;
+//@synthesize labelFont = _labelFont;
+//@synthesize labelColor = _labelColor;
+//@synthesize labelShadowColor = _labelShadowColor;
+//@synthesize labelRadius = _labelRadius;
+//@synthesize selectedSliceStroke = _selectedSliceStroke;
+//@synthesize selectedSliceOffsetRadius = _selectedSliceOffsetRadius;
+//@synthesize showPercentage = _showPercentage;
 @synthesize DLDataArray, DLColorsArray,DLPieChartView;
 
 static CGPathRef CGPathCreateArc(CGPoint center, CGFloat radius, CGFloat startAngle, CGFloat endAngle) 
@@ -223,7 +231,19 @@ static CGPathRef CGPathCreateArc(CGPoint center, CGFloat radius, CGFloat startAn
             label = [NSString stringWithFormat:@"%0.0f", layer.percentage*100];
         else
             label = (layer.text)?layer.text:[NSString stringWithFormat:@"%0.0f", layer.value];
-        CGSize size = [label sizeWithFont:self.labelFont];
+        
+        //CGSize size = [label sizeWithFont:self.labelFont];
+        CGSize size;
+        
+        if(getIOSVersion() >= 7) {
+            size = [label sizeWithAttributes:@{NSFontAttributeName:self.labelFont}];
+        }
+        else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+            size = [label sizeWithFont:self.labelFont];
+#pragma clang diagnostic pop
+        }
         
         if(M_PI*2*_labelRadius*layer.percentage < MAX(size.width,size.height))
         {
@@ -636,7 +656,20 @@ static CGPathRef CGPathCreateArc(CGPoint center, CGFloat radius, CGFloat startAn
         [textLayer setShadowOpacity:1.0f];
         [textLayer setShadowRadius:2.0f];
     }
-    CGSize size = [@"0" sizeWithFont:self.labelFont];
+    
+    //CGSize size = [@"0" sizeWithFont:self.labelFont];
+    CGSize size;
+    
+    if(getIOSVersion() >= 7) {
+        size = [@"0" sizeWithAttributes:@{NSFontAttributeName:self.labelFont}];
+    }
+    else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        size = [@"0" sizeWithFont:self.labelFont];
+#pragma clang diagnostic pop
+    }
+    
     [CATransaction setDisableActions:YES];
     [textLayer setFrame:CGRectMake(0, 0, size.width, size.height)];
     [textLayer setPosition:CGPointMake(_pieCenter.x + (_labelRadius * cos(0)), _pieCenter.y + (_labelRadius * sin(0)))];
@@ -656,7 +689,18 @@ static CGPathRef CGPathCreateArc(CGPoint center, CGFloat radius, CGFloat startAn
     else
         label = (pieLayer.text)?pieLayer.text:[NSString stringWithFormat:@"%0.0f", value];
     
-    CGSize size = [label sizeWithFont:self.labelFont];
+    //CGSize size = [label sizeWithFont:self.labelFont];
+    CGSize size;
+    
+    if(getIOSVersion() >= 7) {
+        size = [label sizeWithAttributes:@{NSFontAttributeName:self.labelFont}];
+    }
+    else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        size = [label sizeWithFont:self.labelFont];
+#pragma clang diagnostic pop
+    }
     
     [CATransaction setDisableActions:YES];
     if(M_PI*2*_labelRadius*pieLayer.percentage < MAX(size.width,size.height) || value <= 0)

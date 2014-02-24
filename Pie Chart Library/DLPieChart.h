@@ -9,21 +9,27 @@
 #import <UIKit/UIKit.h>
 
 @class DLPieChart;
+
 @protocol DLPieChartDataSource <NSObject>
+
 @required
 - (NSUInteger)numberOfSlicesInPieChart:(DLPieChart *)pieChart;
 - (CGFloat)pieChart:(DLPieChart *)pieChart valueForSliceAtIndex:(NSUInteger)index;
+
 @optional
 - (UIColor *)pieChart:(DLPieChart *)pieChart colorForSliceAtIndex:(NSUInteger)index;
 - (NSString *)pieChart:(DLPieChart *)pieChart textForSliceAtIndex:(NSUInteger)index;
+
 @end
 
 @protocol DLPieChartDelegate <NSObject>
+
 @optional
 - (void)pieChart:(DLPieChart *)pieChart willSelectSliceAtIndex:(NSUInteger)index;
 - (void)pieChart:(DLPieChart *)pieChart didSelectSliceAtIndex:(NSUInteger)index;
 - (void)pieChart:(DLPieChart *)pieChart willDeselectSliceAtIndex:(NSUInteger)index;
 - (void)pieChart:(DLPieChart *)pieChart didDeselectSliceAtIndex:(NSUInteger)index;
+
 @end
 
 @interface DLPieChart : UIView <DLPieChartDelegate, DLPieChartDataSource>
@@ -42,10 +48,13 @@
 @property(nonatomic, assign) CGFloat selectedSliceStroke;
 @property(nonatomic, assign) CGFloat selectedSliceOffsetRadius;
 @property(nonatomic, assign) BOOL    showPercentage;
+@property (nonatomic ,retain) NSMutableArray *DLDataArray;
+@property (nonatomic, retain) NSMutableArray *DLColorsArray;
+@property (nonatomic, retain) DLPieChart *DLPieChartView;
+
 - (id)initWithFrame:(CGRect)frame Center:(CGPoint)center Radius:(CGFloat)radius;
 - (void)reloadData;
 - (void)setPieBackgroundColor:(UIColor *)color;
-
 - (void)setSliceSelectedAtIndex:(NSInteger)index;
 - (void)setSliceDeselectedAtIndex:(NSInteger)index;
 
@@ -58,9 +67,5 @@
             labelRadius:(CGFloat)labelRadius;
 
 -(void)drawLegends:(DLPieChart *)layerHostingView dataArray:(NSMutableArray*)dataArray;
-
-@property (nonatomic ,retain) NSMutableArray *DLDataArray;
-@property (nonatomic, retain) NSMutableArray *DLColorsArray;
-@property (nonatomic, retain) DLPieChart *DLPieChartView;
 
 @end;
